@@ -5,12 +5,12 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAkQ6JjzCpMDNNd9q8bFo9CS-gTROYczCA",
-  authDomain: "confidence-rl-xp-final.firebaseapp.com",
-  projectId: "confidence-rl-xp-final",
-  storageBucket: "confidence-rl-xp-final.firebasestorage.app",
-  messagingSenderId: "597255080162",
-  appId: "1:597255080162:web:902d8247656b117d2d76bb"
+  apiKey: "AIzaSyDxEUSrDlq0oGeV2WZXoKA_bD56boHXFf4",
+  authDomain: "rlexperiment-destais-sevestre.firebaseapp.com",
+  projectId: "rlexperiment-destais-sevestre",
+  storageBucket: "rlexperiment-destais-sevestre.firebasestorage.app",
+  messagingSenderId: "885456230758",
+  appId: "1:885456230758:web:faa1a9aca5cc411252d0a7"
 };
 
 const app = initializeApp(firebaseConfig);
