@@ -1,0 +1,185 @@
+import { record_general_participant_info } from "./record_general_participant_info.js";
+import { experiment_state_machine } from "./experiment_state_machine.js";
+
+const MAX_PRACTICE_ATTEMPTS = 3;
+
+function check_performance_after_practice(exp) {
+  /*
+  Function that:
+  - Checks if participant has pcorrect > 59.8% after practice session
+  - If pcorrect <= 59.8% and attempts remain (< MAX_PRACTICE_ATTEMPTS), participant
+    is sent back to the instructions to retry the practice round
+  - If pcorrect <= 59.8% on the last allowed attempt, participant is excluded and experiment ends
+  - If pcorrect > 59.8%, participant continues to real Learning Task sessions
+  */
+
+  console.log('--- check_performance_after_practice() ---');
+  console.log(`Performance: ${(exp.pcorrect_LearningTask * 100).toFixed(1)}%`);
+  console.log(`Practice attempt: ${exp.practice_attempts} / ${MAX_PRACTICE_ATTEMPTS}`);
+
+  let failed = exp.pcorrect_LearningTask <= 0.598;
+  let attempts_remaining = exp.practice_attempts < MAX_PRACTICE_ATTEMPTS;
+  let should_retry = failed && attempts_remaining;
+  let should_exclude = failed && !attempts_remaining;
+
+  // ========== CRITICAL: CLEAR EVERYTHING FIRST ==========
+  // Clear all possible containers
+  $('#Stage').remove();
+  $('#Vals').remove();
+  $('#respButtons').remove();
+  $('#FinalButton').remove();
+  $('#Top').empty();
+  $('#ContBox').empty();
+  $('#Bottom').empty();
+  $('#Cont2_row').empty();
+  
+  // Reset HTML structure
+  document.getElementById("Cont").style.maxWidth = null;
+  document.getElementById("Cont").style.maxHeight = null;
+  document.getElementById("ContBox").style.maxWidth = null;
+  document.getElementById("ContBox").style.maxHeight = null;
+  document.getElementById("ContBox").className = "col-12 mt-3 visible";
+
+  // Create shortcut for text object
+  let text = exp.text_mid_task_exclusion;
+
+  // Initialize variables
+  let main_text = "";
+  let link = "";
+
+  // ------ Display different messages based on outcome ------
+  if (should_exclude) {
+    // EXCLUSION: Participant must terminate the experiment (no attempts left)
+    console.log(` Performance below threshold after ${exp.practice_attempts} attempts - EXCLUSION`);
+
+    // Set up "exclusion" completion link
+    link = exp.link_exclusion || exp.generic_prolific_link || "#";
+
+    // Set up message that they are excluded from the experiment
+    main_text = `
+      <div class="col">
+        <div class="col">
+          <p align="center"><br>${text.exclusion_1}</p>
+          <p align="center"><br>${text.exclusion_2}</p>
+          <p align="center"><br>${text.exclusion_3}<br></p>
+        </div>
+      </div>
+    `;
+
+    // No bonus is owed: the participant never reached the real (paid) sessions,
+    // the practice round's point total is not a real bonus.
+    exp.bonus_UK_pounds = 0;
+
+    // Only call record function if NOT in test mode
+    if (!exp.test_mode_do_NOT_send_data) {
+      record_general_participant_info(exp);
+    }
+
+  } else if (should_retry) {
+    // RETRY: Performance below threshold, but attempts remain - send back to instructions
+    console.log(` Performance below threshold - RETRY (attempt ${exp.practice_attempts} of ${MAX_PRACTICE_ATTEMPTS})`);
+
+    main_text = `
+      <div class="col">
+        <div class="col">
+          <p align="center"><br>${text.retry_1}</p>
+          <p align="center"><br>${text.retry_2}</p>
+          <p align="center"><br>${text.retry_3} ${exp.practice_attempts} / ${MAX_PRACTICE_ATTEMPTS}</p>
+        </div>
+      </div>
+    `;
+
+  } else {
+    // INCLUSION: Participant can continue the experiment
+    console.log('Performance above threshold - INCLUSION');
+
+    main_text = `
+      <div class="col">
+        <div class="col">
+          <p align="center"><br>${text.inclusion_1}</p>
+          <p align="center"><br>${text.inclusion_2}</p>
+          <p align="center"><br>Please follow the instructions carefully to complete the remaining tasks.</p>
+          <p align="center"><br>You will now start the next part of the task with new symbols.</p>
+        </div>
+      </div>
+      `;
+  }
+
+  // Create HTML containers (FRESH START)
+  let container_Stage = "<div class='row justify-content-center' id='Stage'></div>";
+  let container_Button = '<div class="col justify-content-center align-items-center" id="c_button"></div>';
+
+  $("#ContBox").html(container_Stage + container_Button);
+
+  // Add text
+  $("#Stage").html(`<div class="row justify-content-center">${main_text}</div>`);
+
+  // Add button
+  if (should_exclude) {
+    // EXCLUSION: Button to return to Prolific (or close window in test mode)
+    let button_html = '';
+    if (exp.test_mode_do_NOT_send_data === 1) {
+      button_html = `<div class="row justify-content-center">
+                       <div class="btn btn-default myBtn" style="background-color: #dc3545; cursor: default;">
+                         Test Complete (Excluded) - Close Window
+                       </div>
+                     </div>`;
+    } else {
+      button_html = `<div class="row justify-content-center">
+                       <a href="${link}" class="btn btn-default myBtn" style="background-color: #dc3545;">
+                         ${text.button_Prolific}
+                       </a>
+                     </div>`;
+    }
+    $("#c_button").html(button_html);
+
+  } else if (should_retry) {
+    // RETRY: Button to go back to the instructions and try the practice round again
+    let button_html = `<div class="row justify-content-center">
+                         <input type="button" class="btn btn-default myBtn" id="retry_button"
+                                value="${text.button_retry}" style="background-color: #ffc107;">
+                       </div>`;
+    $("#c_button").html(button_html);
+
+    document.getElementById("retry_button").onclick = function () {
+      console.log('Participant clicked retry - going back to instructions');
+
+      // Clear the performance check display
+      $("#ContBox").empty();
+      $("#Bottom").empty();
+
+      // Go back to the Learning Task instructions (state 2) so they can re-read them
+      exp.experiment_state = 2;
+      experiment_state_machine(exp);
+    };
+
+  } else {
+    // INCLUSION: Button to continue to main task
+    let button_html = `<div class="row justify-content-center">
+                         <input type="button" class="btn btn-default myBtn" id="move_on_button"
+                                value="Continue to Main Task" style="background-color: #28a745;">
+                       </div>`;
+    $("#c_button").html(button_html);
+
+    document.getElementById("move_on_button").onclick = function () {
+      console.log('Participant clicked continue - moving to main task');
+
+      // Clear the performance check display
+      $("#ContBox").empty();
+      $("#Bottom").empty();
+
+      // Call the continuation function stored by the Learning Task
+      if (window.LT_continue_after_check) {
+        window.LT_continue_after_check();
+      } else {
+        console.error('Cannot find Learning Task continuation function');
+        alert('Error: Cannot continue to main task. Please refresh and try again.');
+      }
+    };
+  }
+
+  // Make container visible
+  document.getElementById('Cont').style.visibility = "visible";
+}
+
+export { check_performance_after_practice };
