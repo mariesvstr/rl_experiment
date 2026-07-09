@@ -4,7 +4,7 @@ var text_LT_WORST = {
   //page 0 
   [
     '<div class="titleInstruction"> Study Overview </div>',
-    '<p style="color:red;"><strong>It is strictly forbidden to use AI tools (e.g. ChatGPT) during this study.</strong></p>',
+    '<p style="color:red;"><strong>It is strictly forbidden to use AI tools during this study.</strong></p>',
     'This study consists of a first task followed by two other tasks. <strong>If you perform well enough on the first task, you will be able to move on to tasks 2 & 3, otherwise you will have to stop the study there.</strong><br> You are allowed three attempts.',
     'You can earn a <strong>bonus payment</strong> which will depend on how much experimental currency units (ECUs) you collect during this study.',
     '<strong>You will start with 60 ECU.</strong> Your goal is to maximize your total earnings.',
