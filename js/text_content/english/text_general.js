@@ -16,6 +16,7 @@ let startExperiment = {
     getID_error: 'You must enter your 24-digit Prolific ID.',
     //button : 'Next',
     consent_text : ['<div id="consent-form">'+
+                    '<p style="color:red;"><strong>This study must be completed on a computer (desktop or laptop). It will not work on a phone or tablet.</strong></p>'+
                     '<h1>Consent Form</h1>'+
                     // paragraph 1
                     '<h2>Information for the participant</h2>'+
@@ -40,7 +41,7 @@ let startExperiment = {
                     // paragraph 5
                     '<h3> Contact And Additional Information </h3>'+
                     '<p>Email: conecteam.pse@gmail.com</p>'+
-                    '<p>This research has received a favorable opinion from the Institutional Review Board of Paris School of Economics / IRB 2023-014 on 29/06/2026.</p>' +
+                    '<p>This research has received a favorable opinion from the Institutional Review Board of Paris School of Economics / IRB 2023-014 on 28/03/2025.</p>' +
                     '<p>Your participation in this research confirms that you have read this information and wish to participate in the research study.</p>'
                   ],
     age_checkbox : ' I am 18 years old or more',
