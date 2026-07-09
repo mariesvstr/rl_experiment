@@ -89,7 +89,7 @@ var text_LT_WORST = {
       </div>
     </details>`,
 
-    '<p>This bonus is calculated on every trial, but the results will only be shown to you at the very end of all tasks. .</p>',
+    '<p>This bonus is calculated on every trial, but the results will only be shown to you at the very end of all tasks.</p>',
 
     ], 
 
